@@ -25,7 +25,6 @@ String addSuffix (messageDate) {
 
 // Formats date nicely
 String formatDate(String messageDate) {
-  print(messageDate);
   DateTime parsedDate = DateTime.parse(messageDate);
   String strDate = DateFormat.yMMMMd('en_US').format(parsedDate).toString();
   int spaceIndex = strDate.indexOf(" ", strDate.indexOf(" ") + 1) - 1;
