@@ -1,1 +1,1 @@
-# Breakthrough Apps Coding Challenge: Profile Page and Profile Edit Page
+# Breakthrough Apps Coding Challenge: Profile and Profile Edit Page
