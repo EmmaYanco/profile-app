@@ -6,8 +6,8 @@
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:Breakthrough_Profile/data/globals.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class UserInteraction {
   // Table with user data
@@ -24,8 +24,7 @@ class UserInteraction {
   // Updates user in Firebase, generating JSON data from UserAccount
   Future<void> updateUser(UserAccount user) async {
     Map<String, dynamic> userData = user.toJson();
-    String uid = FirebaseAuth.instance.currentUser.uid;
-    await users.doc(uid).update(userData);
+    await users.doc('0').update(userData);
   }
 }
 
@@ -34,24 +33,27 @@ class UserAccount {
   String firstName = '';
   String lastName = '';
   String dateOfBirth = '';
+  String profilePic = '';
+  String profilePicPath = '';
 
   Map<String, dynamic> toJson() {
-
     return {
       FNAME: this.firstName,
       LNAME: this.lastName,
       DOB: this.dateOfBirth,
+      PPIC: this.profilePicPath,
     };
   }
 
   // Builds from JSON data
   UserAccount fromJson(Map<String, dynamic> userData, String userId) {
-
     this.id = userId;
     this.firstName = userData[FNAME];
-    this.lastName = userData[FNAME];
+    this.lastName = userData[LNAME];
     this.dateOfBirth = userData[DOB];
- 
+    this.profilePic = userData[PPIC];
+    this.profilePicPath = userData[PPIC].toString();
+
     return this;
   }
 
@@ -61,31 +63,14 @@ class UserAccount {
     clonedAccount.firstName = this.firstName;
     clonedAccount.lastName = this.lastName;
     clonedAccount.dateOfBirth = this.dateOfBirth;
+    clonedAccount.profilePicPath = this.profilePicPath;
 
     return clonedAccount;
   }
 
-}
-
-
-
-// USED FOR BUG FIX
-
-// CITE : https://github.com/flutter/flutter/issues/18547
-// DESC : Fixes error-catching bug currently present in storage module
-Future<T> runSafe<T>(Future<T> Function() func) {
-  final onDone = Completer<T>();
-  runZoned(
-    func,
-    onError: (e, s) {
-      if (!onDone.isCompleted) {
-        onDone.completeError(e, s as StackTrace);
-      }
-    },
-  ).then((result) {
-    if (!onDone.isCompleted) {
-      onDone.complete(result);
-    }
-  });
-  return onDone.future;
+  // Adds photo to Storage and sets user's profilePicPath to the new location
+  addPhoto(image) async {
+    TaskSnapshot taskSnapshot = await imageStorage.child('0').putFile(image);
+    this.profilePicPath = await taskSnapshot.ref.getDownloadURL();
+  }
 }
